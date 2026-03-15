@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homemade Food Delivery</title>
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  background:#f4f4f4;
+  padding-bottom:60px;
+}
+
+header{
+  background:#ff6b00;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+}
+
+.menu{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:15px;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  overflow:hidden;
+}
+
+.card img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+}
+
+.info{
+  padding:10px;
+  text-align:center;
+}
+
+.price{
+  color:#ff6b00;
+  font-weight:bold;
+}
+
+button{
+  background:#ff6b00;
+  color:white;
+  border:none;
+  padding:8px;
+  border-radius:6px;
+  margin:4px;
+  cursor:pointer;
+}
+
+.cart{
+  background:white;
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+}
+
+.star{
+  font-size:26px;
+  cursor:pointer;
+  color:gray;
+}
+
+.active{
+  color:gold;
+}
+
+.admin{
+  display:none;
+  padding:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid gray;
+  padding:8px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<header>Homemade Food Delivery</header>
+
+<div class="menu">
+
+<!-- Veg Thali Card -->
+<div class="card">
+<img src="https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab">
+<div class="info">
+<h3>Veg Thali</h3>
+<p class="price">₹120</p>
+<button onclick="addCart('Veg Thali',120)">Add Cart</button>
+<button onclick="openFeedback('Veg Thali')">Feedback</button>
+</div>
+</div>
+
+<!-- Chicken Curry Card -->
+<div class="card">
+<img src="https://images.unsplash.com/photo-1603894584373-5ac82b2ae398">
+<div class="info">
+<h3>Chicken Curry</h3>
+<p class="price">₹180</p>
+<button onclick="addCart('Chicken Curry',180)">Add Cart</button>
+<button onclick="openFeedback('Chicken Curry')">Feedback</button>
+</div>
+</div>
+
+<!-- Paneer Masala Card -->
+<div class="card">
+<img src="https://images.unsplash.com/photo-1631452180519-c014fe946bc7">
+<div class="info">
+<h3>Paneer Masala</h3>
+<p class="price">₹150</p>
+<button onclick="addCart('Paneer Masala',150)">Add Cart</button>
+<button onclick="openFeedback('Paneer Masala')">Feedback</button>
+</div>
+</div>
+
+<!-- Biryani Card -->
+<div class="card">
+<img src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a">
+<div class="info">
+<h3>Biryani</h3>
+<p class="price">₹200</p>
+<button onclick="addCart('Biryani',200)">Add Cart</button>
+<button onclick="openFeedback('Biryani')">Feedback</button>
+</div>
+</div>
+
+</div>
+
+<!-- Cart Section -->
+<div class="cart">
+<h3>Your Cart</h3>
+<ul id="cartList"></ul>
+<h3>Total: ₹<span id="total">0</span></h3>
+<button onclick="placeOrder()">Place Order</button>
+</div>
+
+<!-- Feedback Section -->
+<div style="padding:10px">
+<h3>Feedback</h3>
+<input type="text" id="name" placeholder="Your Name"><br><br>
+<input type="text" id="foodName" readonly><br><br>
+<div>
+<span class="star" onclick="rate(1)">★</span>
+<span class="star" onclick="rate(2)">★</span>
+<span class="star" onclick="rate(3)">★</span>
+<span class="star" onclick="rate(4)">★</span>
+<span class="star" onclick="rate(5)">★</span>
+</div><br>
+<textarea id="message" placeholder="Write feedback"></textarea><br><br>
+<button onclick="submitFeedback()">Submit Feedback</button>
+</div>
+
+<!-- Admin Panel Button -->
+<div style="text-align:center">
+<button onclick="adminLogin()">Admin Panel</button>
+</div>
+
+<!-- Admin Panel -->
+<div class="admin" id="adminPanel">
+<h2>Orders</h2>
+<table id="orderTable">
+<tr>
+<th>Items</th>
+<th>Total</th>
+</tr>
+</table>
+<h2>Feedback</h2>
+<table id="feedbackTable">
+<tr>
+<th>Name</th>
+<th>Food</th>
+<th>Rating</th>
+<th>Message</th>
+</tr>
+</table>
+</div>
+
+<!-- Script -->
+<script>
+let cart=[];
+let total=0;
+let rating=0;
+
+function addCart(name,price){
+  cart.push(name);
+  total+=price;
+  let li=document.createElement("li");
+  li.innerText=name+" - ₹"+price;
+  document.getElementById("cartList").appendChild(li);
+  document.getElementById("total").innerText=total;
+}
+
+function placeOrder(){
+  if(cart.length==0){
+    alert("Cart Empty");
+    return;
+  }
+  let order={items:cart,total:total};
+  let orders=JSON.parse(localStorage.getItem("orders"))||[];
+  orders.push(order);
+  localStorage.setItem("orders",JSON.stringify(orders));
+  alert("Order Placed!");
+  cart=[]; total=0;
+  document.getElementById("cartList").innerHTML="";
+  document.getElementById("total").innerText="0";
+}
+
+// Feedback
+function openFeedback(food){
+  document.getElementById("foodName").value = food;
+}
+
+function rate(num){
+  rating=num;
+  let stars=document.querySelectorAll(".star");
+  stars.forEach((s,i)=>{ s.classList.toggle("active",i<num); });
+}
+
+function submitFeedback(){
+  let feedback={
+    name:document.getElementById("name").value,
+    food:document.getElementById("foodName").value,
+    rating:rating,
+    message:document.getElementById("message").value
+  };
+  let data=JSON.parse(localStorage.getItem("feedback"))||[];
+  data.push(feedback);
+  localStorage.setItem("feedback",JSON.stringify(data));
+  alert("Feedback Submitted!");
+  // Reset form to allow new feedback
+  document.getElementById("name").value="";
+  document.getElementById("foodName").value="";
+  document.getElementById("message").value="";
+  rating=0;
+  document.querySelectorAll(".star").forEach(s=>s.classList.remove("active"));
+}
+
+// Admin
+function adminLogin(){
+  let pass=prompt("Enter Admin Password");
+  if(pass==="admin123"){
+    showAdmin();
+  }else{
+    alert("Wrong Password");
+  }
+}
+
+function showAdmin(){
+  document.getElementById("adminPanel").style.display="block";
+  let orders=JSON.parse(localStorage.getItem("orders"))||[];
+  orders.forEach(function(o){
+    let row=document.getElementById("orderTable").insertRow();
+    row.insertCell(0).innerHTML=o.items.join(", ");
+    row.insertCell(1).innerHTML="₹"+o.total;
+  });
+  let feedback=JSON.parse(localStorage.getItem("feedback"))||[];
+  feedback.forEach(function(f){
+    let row=document.getElementById("feedbackTable").insertRow();
+    row.insertCell(0).innerHTML=f.name;
+    row.insertCell(1).innerHTML=f.food;
+    row.insertCell(2).innerHTML=f.rating+" ⭐";
+    row.insertCell(3).innerHTML=f.message;
+  });
+}
+</script>
+
+</body>
+</html>
